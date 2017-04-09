@@ -1,0 +1,1 @@
+from ipysig.version import __version__

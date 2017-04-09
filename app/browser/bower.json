@@ -1,0 +1,22 @@
+{
+  "name": "browser",
+  "homepage": "https://github.com/bsnacks000/IPyGraphViz_testing",
+  "authors": [
+    "js"
+  ],
+  "description": "client side of the IPySig prototype",
+  "main": "main.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "lokijs": "^1.4.3",
+    "sigma.js": "https://github.com/jacomyal/sigma.js.git#^1.2.0"
+  }
+}

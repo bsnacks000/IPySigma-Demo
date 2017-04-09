@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>IPySig Session</title>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="custom.css">
+
+        <!-- sigma (need to figure out how to build these in bower... for now imported from a public folder) -->
+        <script src="sigma/sigma.min.js" charset="utf-8"></script>
+        <script src="sigma/sigma.layout.forceAtlas2.min.js" charset="utf-8"></script>
+
+
+    </head>
+
+
+    <body>
+
+        <header>
+            <h1> IPySigma: ProtoType</h1>
+            <div class="container">
+                <!-- Bootstrap 2- field form  -->
+                <form class="form-inline" id='load-main-graph'>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Load Graph</button>
+                        <label> Enter Graph Title </label>
+                        <input class="form-control" type="text" value="My Test Graph" id="graph-title">
+                    </div>
+                </form>
+            </div>
+        </header>
+
+
+        <!-- <ul id='graph-string'></ul> -->
+
+        <!-- pause Force Atlas button -->
+        <div class='container' id='controlContainer'>
+            <button type="button" id="pauseForceAtlas"> Pause Gravity </button>
+        </div>
+
+        <!-- graph sits here -->
+        
+        <div class='container' id="graphContainer" ></div>    
+        
+       
+        <!-- bower imports -->
+        <!-- <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
+        <script src="bower_components/jquery/dist/jquery.min.js" charset="utf-8"></script>
+        
+        <script src="bower_components/lokijs/build/lokijs.min.js" charset="utf-8"></script>
+        <script src="bower_components/lokijs/build/loki-indexed-adapter.min.js" charset="utf-8"></script>
+
+        <!-- requirejs and socket.io client -->
+        <script src="/socket.io/socket.io.js"></script>
+
+        
+        <!-- app scripts and modules-->
+        <script src="client.js" charset="utf-8"></script>
+
+    </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "ipysig_prototype",
+  "version": "0.0.1",
+  "description": "A prototype app for IPySigma project that focuses on intercommunication between the notebook server and express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jd",
+  "license": "ISC",
+  "dependencies": {
+    "@jupyterlab/services": "^0.40.2",
+    "express": "^4.15.2",
+    "socket.io": "^1.7.3",
+    "ws": "^2.2.1",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
