@@ -38,7 +38,6 @@ def sigma_export_json(self):
     
     return json.dumps(sigma_obj)
 
-# PROTECTED API
 
 def sigma_add_degree_centrality(self):
     dc = nx.degree_centrality(self)
