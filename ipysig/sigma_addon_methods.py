@@ -46,7 +46,7 @@ def sigma_add_degree_centrality(self):
 
 def sigma_add_betweenness_centrality(self):
     bc = nx.betweenness_centrality(self)
-    nx.set_node_attributes(self,'simga_between_central',bc)
+    nx.set_node_attributes(self,'sigma_between_central',bc)
 
 
 def sigma_add_pagerank(self):
