@@ -2,6 +2,8 @@
 A module with some mock classes that can or have been used for testing/debugging
 '''
 import json
+import networkx as nx
+from ipysig.sigma_addon_methods import *
 
 
 class DummyGraph(object):
@@ -21,3 +23,30 @@ class DummyGraph(object):
     @classmethod
     def get_graph(cls, name):
         return json.dumps(cls._store[name].graph)
+
+
+class InjectedGraph(object):
+    '''
+    returns an injected graph for development testing if not already done
+
+    '''
+
+    def __new__(cls, g=None):
+
+        cls.g = g or nx.Graph()
+
+        if not hasattr(cls.g,'sigma_make_graph'):
+
+            nx.Graph.sigma_make_graph = sigma_make_graph          
+            nx.Graph.sigma_export_json = sigma_export_json
+
+            nx.Graph.sigma_add_degree_centrality = sigma_add_degree_centrality
+            nx.Graph.sigma_add_betweenness_centrality = sigma_add_betweenness_centrality
+            nx.Graph.sigma_add_pagerank = sigma_add_pagerank
+            
+            nx.Graph.sigma_node_add_extra = sigma_node_add_extra
+            nx.Graph.sigma_choose_edge_color = sigma_choose_edge_color
+            nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
+            nx.Graph.sigma_edge_weights = sigma_edge_weights
+
+        return cls.g 

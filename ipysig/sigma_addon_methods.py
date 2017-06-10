@@ -7,7 +7,16 @@ import pandas as pd
 import networkx as nx
 from numpy import cos, sin, pi
 from numpy.random import randint 
+
 import json
+
+import logging
+logger = logging.getLogger(__name__)
+
+from exceptions import IPySigmaGraphNodeIndexError, \
+        IPySigmaGraphEdgeIndexError, IPySigmaGraphDataFrameValueError, \
+        IPySigmaGraphJSONValueError
+
 
 #PUBLIC API
 
@@ -22,6 +31,16 @@ def sigma_make_graph(self):
     self.sigma_add_betweenness_centrality()
     
     self.sigma_nodes, self.sigma_edges = self.sigma_build_pandas_dfs()  # makes df and assigns sigma_nodes and sigma_edges instance variables
+    
+    try:
+        if len(self.sigma_nodes.index) == 0 or len(self.sigma_nodes.columns) == 0:
+            raise IPySigmaGraphDataFrameValueError('Sigma Node and Edge dataframes are empty')
+
+    except IPySigmaGraphDataFrameValueError as err:
+        logger.error("Sigma Node and Edge dataframes are empty ")
+        raise err
+
+
     self.sigma_node_add_extra()  # adds the extra node attributes to the data frame
     self.sigma_edge_weights()  # if graph has weighted edges this adds that attribute to the list
     
@@ -32,10 +51,27 @@ def sigma_export_json(self):
     assuming all goes well above, this method returns the sigma_json graph object
     '''
     
-    sigma_obj = { 'graph': {} }  
-    sigma_obj['graph']['nodes'] = self.sigma_nodes.to_dict('records')
-    sigma_obj['graph']['edges'] = self.sigma_edges.to_dict('records')
-    
+
+    try:
+
+        sigma_obj = { 'error': 'false', 'graph': {} }  
+        sigma_obj['graph']['nodes'] = self.sigma_nodes.to_dict('records')
+        sigma_obj['graph']['edges'] = self.sigma_edges.to_dict('records')
+        
+        if len(sigma_obj['graph']['nodes']) == 0:
+            raise IPySigmaGraphJSONValueError(' Sigma JSON Export Error ')
+
+
+    except AttributeError as err: 
+        logger.warning('Sigma Node and Edges have not been set yet: make sure G.sigma_make_graph() has been called first')
+        sigma_obj['error'] = 'true'
+
+
+    except IPySigmaGraphJSONValueError as err:
+        logger.warning('Sigma JSON object node and edgelists are empty') 
+        sigma_obj['error'] = 'true'
+
+
     return json.dumps(sigma_obj)
 
 
@@ -58,30 +94,46 @@ def sigma_build_pandas_dfs(self):
     '''
     dumps graph data into pandas dfs... returns a node and edge dataframe
     for nodes just need to dump attribute dictionary
+    
+    Throws index errors if node or edgelists are blank
 
     :returns: self.sigma_nodes, self.sigma_edges
     '''
-    nodelist = self.nodes(data=True)   
-    nodes = {}
+    
+    try:
 
-    nodes['id'] = [i[0] for i in nodelist]       
-    for k in nodelist[0][1].keys():   # the api always injects at least centrality measuers
-        nodes[k] = [i[1][k] for i in nodelist]
+        nodelist = self.nodes(data=True)   
         
+        if len(nodelist) == 0:
+            raise IPySigmaGraphNodeIndexError('nx.Graph.nodes list is empty')
 
-    # edges
-    e = self.edges(data=True)
-    edgelist = [0 for i in xrange(len(self.edges()))] # init for optimization (large edgelists)
+        nodes = {}
 
-    for i in range(len(edgelist)):
-        edgelist[i] = {'id': i, 'source':e[i][0], 'target':e[i][1]}
-        if (len(e[i][2]) != 0):   # if edge weight exists
-            edgelist[i]['weight'] = e[i][2]['weight']
+        nodes['id'] = [i[0] for i in nodelist]       
+        for k in nodelist[0][1].keys():   # the api always injects at least centrality measuers
+            nodes[k] = [i[1][k] for i in nodelist]
+    
+        e = self.edges(data=True)
+        
+        if len(e) == 0:
+            raise IPySigmaGraphEdgeIndexError('nx.Graph.edges list is empty')
+
+        edgelist = [0 for i in xrange(len(self.edges()))] # init for optimization (large edgelists)
+
+        for i in range(len(edgelist)):
+            edgelist[i] = {'id': i, 'source':e[i][0], 'target':e[i][1]}
+            if (len(e[i][2]) != 0):   # if edge weight exists
+                edgelist[i]['weight'] = e[i][2]['weight']
+
+
+    except (IPySigmaGraphNodeIndexError, IPySigmaGraphEdgeIndexError) as err:
+        logger.error("Node and Edge lists of nx.Graph object have been left blank ")
+        raise err 
 
 
     sigma_edges = pd.DataFrame(edgelist)   # these are the pandas dfs that will get exported
     sigma_nodes = pd.DataFrame(nodes)
-    
+
     return sigma_nodes, sigma_edges
 
 
@@ -123,27 +175,4 @@ def sigma_choose_edge_color(self,row):
         return 'rgba(112, 0, 0, 0.95)'
 
 
-if __name__ == '__main__':
-    
-    import networkx as nx
-
-    nx.Graph.sigma_make_graph = sigma_make_graph          # these each need to be tested 
-    nx.Graph.sigma_export_json = sigma_export_json
-
-    nx.Graph.sigma_add_degree_centrality = sigma_add_degree_centrality
-    nx.Graph.sigma_add_betweenness_centrality = sigma_add_betweenness_centrality
-    nx.Graph.sigma_add_pagerank = sigma_add_pagerank
-        
-    nx.Graph.sigma_node_add_extra = sigma_node_add_extra
-    nx.Graph.sigma_choose_edge_color = sigma_choose_edge_color
-    nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
-    nx.Graph.sigma_edge_weights = sigma_edge_weights
-
-
-    G = nx.complete_graph(5)
-
-    G.sigma_make_graph()
-    print G.sigma_nodes
-    print G.sigma_edges
-    print(G.sigma_export_json())
 

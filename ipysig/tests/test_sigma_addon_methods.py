@@ -5,9 +5,14 @@ nose tests for ipysig.sigma_addon_methods.py
 import unittest 
 import networkx as nx
 import pandas as pd
+import json
 
-from ipysig.sigma_addon_methods import *
+from ..sigma_addon_methods import *
+from ..exceptions import IPySigmaGraphDataFrameValueError, IPySigmaGraphEdgeIndexError, IPySigmaGraphNodeIndexError
+from .mocks import InjectedGraph
 
+import logging
+logger = logging.getLogger(__name__)
 
 
 class TestSigmaAddOns(unittest.TestCase):
@@ -159,11 +164,51 @@ class TestSigmaAddOns(unittest.TestCase):
         self.assertIn('some_attr',self.graph.sigma_nodes)
 
 
-    def test_export_json(self):
-        pass
+    def test_sigma_build_pandas_dfs_raise_node_index_error_if_blank(self):
+
+        blank_graph = InjectedGraph()
+        self.assertRaises(IPySigmaGraphNodeIndexError, blank_graph.sigma_make_graph)
+
+
+    def test_sigma_build_pandas_dfs_raise_edge_index_error_if_blank(self):
+
+        blank_graph = InjectedGraph()
+        blank_graph.add_nodes_from(['a','b','c'])
+        self.assertRaises(IPySigmaGraphEdgeIndexError, blank_graph.sigma_make_graph)
 
 
     def test_sigma_build_pandas_dfs_raise_error_if_none(self):
 
-        #TODO implement exception and test
-        pass 
+        def sigma_build_pandas_dfs_none():
+            '''
+            this simulates a bogus override of the sigma_build_pandas_df method
+            '''
+            return pd.DataFrame(None), pd.DataFrame(None)
+
+        self.graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs_none
+
+        self.assertRaises(IPySigmaGraphDataFrameValueError, self.graph.sigma_make_graph)
+
+
+
+    def test_export_json_flag_if_empty(self):
+        
+        def sigma_build_pandas_dfs_none():
+            '''
+            this simulates a bogus override of the sigma_build_pandas_df method
+            '''
+            return pd.DataFrame(None), pd.DataFrame(None)
+
+        self.graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs_none
+        self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()
+
+        j = self.graph.sigma_export_json()
+
+        self.assertTrue(json.loads(j)['error'] == 'true')
+
+    def test_export_json_flag_if_dfs_do_not_exist(self):
+        
+
+        j = self.graph.sigma_export_json()
+
+        self.assertTrue(json.loads(j)['error'] == 'true')
