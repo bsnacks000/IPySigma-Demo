@@ -107,12 +107,12 @@ def sigma_edge_weights(self):
     if 'weight' in self.sigma_edges.columns:
         self.sigma_edges['size'] = self.sigma_edges['weight'] * 2
         # color code edges
-        self.sigma_edges['color'] = self.sigma_edges.apply(sigma_choose_edge_color, axis=1)
+        self.sigma_edges['color'] = self.sigma_edges.apply(self.sigma_choose_edge_color, axis=1)
     else:
         self.sigma_edges['color'] = '#d3d3d3' # grey if not weighted
 
 
-def sigma_choose_edge_color(self, row):
+def sigma_choose_edge_color(self,row):
     # callback for sigma_edge_weights 
     # bins the color weight and returns a darker hex value as it increases
     if row['weight'] == 1:

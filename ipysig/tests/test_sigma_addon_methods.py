@@ -102,22 +102,13 @@ class TestSigmaAddOns(unittest.TestCase):
 
 
     def test_extras_are_added_to_graph_obj(self):
-        self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()
-        self.graph.sigma_node_add_extra()
-
-        node_data = self.graph.nodes(data=True)
-
-        for node in node_data:
-            self.assertIn('y',node[1]) 
-            self.assertIn('color',node[1])  
-            self.assertIn('size',node[1])
-            self.assertIn('x', node[1])
-
-
-    def test_sigma_build_pandas_dfs_raise_error_if_none(self):
-
-        #TODO implement exception and test
-        pass 
+        
+        self.graph.sigma_make_graph()
+        
+        self.assertIn('y',self.graph.sigma_nodes) 
+        self.assertIn('color',self.graph.sigma_nodes)  
+        self.assertIn('size',self.graph.sigma_nodes)
+        self.assertIn('x', self.graph.sigma_nodes)
 
 
     def test_edge_weight_color_size_are_set_if_exist(self):
@@ -131,22 +122,23 @@ class TestSigmaAddOns(unittest.TestCase):
 
     def test_sigma_node_df_has_id(self):
         
-        self.graph.sigma_nodes, self.graph.sigma_edges = self.sigma_build_pandas_dfs()
-        self.assertTrue(self.graph.sigma_nodes['id'] in self.graph.sigma_nodes)
+        self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()
+        self.assertIn('id',self.graph.sigma_nodes)
 
 
     def test_sigma_make_graph_produces_neccesary_columns(self):
         
-        correct_nodes = ['id','x','y','color','size']
-        correct_edges = ['source', 'target']
-        correct_edges_weighted = ['source','target','color','weight','size']
+        correct_nodes = ['id','x','y','color','size', 'sigma_deg_central', 'sigma_pagerank', 'sigma_between_central']
+        correct_edges = ['id','source', 'target', 'color']
+        correct_edges_weighted = ['id', 'source','target','color','weight','size']
 
         self.graph.sigma_make_graph()
         self.weighted_graph.sigma_make_graph()
 
         node_col_list = self.graph.sigma_nodes.columns.tolist()
         edge_col_list = self.graph.sigma_edges.columns.tolist()
-        weight_edge_col_list = self.weighted_graph.sigma_edges.tolist()
+        print edge_col_list
+        weight_edge_col_list = self.weighted_graph.sigma_edges.columns.tolist()
 
         for n in node_col_list:
             self.assertIn(n, correct_nodes)
@@ -164,9 +156,14 @@ class TestSigmaAddOns(unittest.TestCase):
 
         self.graph.sigma_make_graph()
 
-        assertIn('some_attr',self.graph.sigma_nodes)
+        self.assertIn('some_attr',self.graph.sigma_nodes)
 
 
     def test_export_json(self):
         pass
 
+
+    def test_sigma_build_pandas_dfs_raise_error_if_none(self):
+
+        #TODO implement exception and test
+        pass 
