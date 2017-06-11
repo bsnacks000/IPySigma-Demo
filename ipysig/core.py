@@ -199,8 +199,8 @@ class IPySig(object):
         injects sigma API methods into the nx.Graph class
         CALLED BY: __init__()
         '''    
-        nx.Graph.sigma_make_graph = sigma_make_graph          # TODO:: these each need to be individually tested (unittests for correct formatting)
-        nx.Graph.sigma_export_json = sigma_export_json        # TODO:: error checking (possibly something like SigmaApiException subclass)
+        nx.Graph.sigma_make_graph = sigma_make_graph          
+        nx.Graph.sigma_export_json = sigma_export_json        
 
         nx.Graph.sigma_add_degree_centrality = sigma_add_degree_centrality
         nx.Graph.sigma_add_betweenness_centrality = sigma_add_betweenness_centrality

@@ -1,4 +1,4 @@
-from ipysig.version import __version__
+__version__ = '0.1.1'
 
 import logging
 import logging.config
