@@ -194,6 +194,7 @@ class IPySig(object):
         else:
             print('There is currently no IPySig.exp_process running')
     
+    
     def _sigma_api_injector(self):
         '''
         injects sigma API methods into the nx.Graph class
