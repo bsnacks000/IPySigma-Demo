@@ -1,5 +1,5 @@
 # IPySigma-Demo
-#### current version: 0.1.0
+#### current version: 0.1.1
 
 This is a demo version of the IPySigma jupyter/node.js application for graph visualization.
 
