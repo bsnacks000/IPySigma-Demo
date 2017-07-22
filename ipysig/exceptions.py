@@ -48,3 +48,14 @@ class IPySigmaGraphJSONValueError(IPySigmaAddOnException, ValueError):
     exception thrown if JSON dict is empty
     '''
     pass
+
+
+class IPySigmaNodeTypeError(IPySigmaAddOnException):
+    '''
+    exception thrown if 'node_type' field has not been assigned by user to node attributes
+    '''
+
+class IPySigmaLabelError(IPySigmaAddOnException):
+    '''
+    exception thrown if 'label' field has not been assigned by the user to node attributes
+    '''

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 from exceptions import IPySigmaGraphNodeIndexError, \
         IPySigmaGraphEdgeIndexError, IPySigmaGraphDataFrameValueError, \
-        IPySigmaGraphJSONValueError
+        IPySigmaGraphJSONValueError, IPySigmaNodeTypeError, IPySigmaLabelError
 
 
 #PUBLIC API
@@ -40,8 +40,16 @@ def sigma_make_graph(self):
         logger.error("Sigma Node and Edge dataframes are empty ")
         raise err
 
+    try:
+        self.sigma_node_add_extra()  # adds the extra node attributes to the data frame
 
-    self.sigma_node_add_extra()  # adds the extra node attributes to the data frame
+    except IPySigmaNodeTypeError as err:
+        logger.warn('No node_type field detected for node attributes: using default color for all nodes')
+
+    except IPySigmaLabelError as err:
+        logger.warn('No label field detected for node attributes: using node id for node label')
+
+
     self.sigma_edge_weights()  # if graph has weighted edges this adds that attribute to the list
     
     
@@ -128,7 +136,7 @@ def sigma_build_pandas_dfs(self):
 
     except (IPySigmaGraphNodeIndexError, IPySigmaGraphEdgeIndexError) as err:
         logger.error("Node and Edge lists of nx.Graph object have been left blank ")
-        raise err 
+        raise 
 
 
     sigma_edges = pd.DataFrame(edgelist)   # these are the pandas dfs that will get exported
@@ -150,8 +158,61 @@ def sigma_node_add_extra(self):
     # stuff for sigma nodes
     self.sigma_nodes['x'] = x
     self.sigma_nodes['y'] = y
-    self.sigma_nodes['color'] = '#79a55c' 
     self.sigma_nodes['size'] = 0.25 + 15 * self.sigma_nodes['sigma_deg_central']  # set to degree central
+
+    # color picker logic and label logic
+    # NOTE errors are raised here and handled as warnings in sigma_build method
+    #TODO this is confusing
+    default_node_color = '#79a55c'
+    
+    try:
+        if 'node_type' not in self.sigma_nodes:
+            self.sigma_nodes['color'] = default_node_color
+            raise IPySigmaNodeTypeError
+
+        
+
+        colors = self.sigma_color_picker()
+        self.sigma_nodes['color'] = self.sigma_nodes.apply(self.sigma_assign_node_colors, args=(colors,), axis=1) 
+
+    except IPySigmaNodeTypeError as err: 
+        raise
+
+def sigma_add_label(self):
+    try:
+
+        if 'label' not in self.sigma_nodes:   # assigns the label field to id if label is not provided
+            self.sigma_nodes['label'] = self.sigma_nodes['id']
+            raise IPySigmaLabelError    
+
+    except IPySigmaLabelError as err:
+        raise 
+
+def sigma_color_picker(self):
+    '''
+    helper method that picks colors based on node_type column
+    '''
+    if 'node_type' not in self.sigma_nodes:
+        return None
+    
+    # assign colors based for each unique value in node_type 
+    node_type_vals_list = self.sigma_nodes['node_type'].unique().tolist()
+    node_type_color_dict = {}
+
+    for node_type in node_type_vals_list:
+        r = lambda: randint(0,255)
+        color = '#%02X%02X%02X' % (r(),r(),r())
+        node_type_color_dict[node_type] = color 
+
+    return node_type_color_dict
+
+
+def sigma_assign_node_colors(self, row, color_dict):
+    '''
+    callback for sigma color picker apply method
+    '''
+    return color_dict[row['node_type']]
+
 
 
 def sigma_edge_weights(self):

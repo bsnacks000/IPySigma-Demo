@@ -212,6 +212,9 @@ class IPySig(object):
         nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
         nx.Graph.sigma_edge_weights = sigma_edge_weights
 
+        nx.Graph.sigma_color_picker = sigma_color_picker
+        nx.Graph.sigma_assign_node_colors = sigma_assign_node_colors
+
 
 
 

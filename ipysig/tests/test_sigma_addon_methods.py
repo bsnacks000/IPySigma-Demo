@@ -8,7 +8,9 @@ import pandas as pd
 import json
 
 from ..sigma_addon_methods import *
-from ..exceptions import IPySigmaGraphDataFrameValueError, IPySigmaGraphEdgeIndexError, IPySigmaGraphNodeIndexError
+from ..exceptions import IPySigmaGraphDataFrameValueError, \
+    IPySigmaGraphEdgeIndexError, IPySigmaGraphNodeIndexError, \
+    IPySigmaNodeTypeError, IPySigmaLabelError
 from .mocks import InjectedGraph
 
 import logging
@@ -30,6 +32,9 @@ class TestSigmaAddOns(unittest.TestCase):
         nx.Graph.sigma_choose_edge_color = sigma_choose_edge_color
         nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
         nx.Graph.sigma_edge_weights = sigma_edge_weights 
+
+        nx.Graph.sigma_color_picker = sigma_color_picker
+        nx.Graph.sigma_assign_node_colors = sigma_assign_node_colors
  
     def setUp(self):
 
@@ -41,10 +46,21 @@ class TestSigmaAddOns(unittest.TestCase):
         self.weighted_graph.add_edge('c','d',weight=0.1)
         self.weighted_graph.add_edge('c','e',weight=0.7)
 
+        self.graph_attr = nx.Graph()
+        self.graph_attr.add_edge(0,1)
+        self.graph_attr.add_edge(1,2)
+        self.graph_attr.add_edge(3,0)
+        self.graph_attr.add_node(0,{'node_type':'A', 'label':'node0'})
+        self.graph_attr.add_node(1,{'node_type':'A', 'label':'node1'})
+        self.graph_attr.add_node(2,{'node_type': 'B', 'label':'node2'})
+        self.graph_attr.add_node(3,{'node_type': 'C', 'label':'node2'})    
+
+
 
     def tearDown(self):
         self.graph = None
         self.weighted_graph = None
+        self.graph_attr = None
 
     def test_make_graph(self):
 
@@ -212,3 +228,42 @@ class TestSigmaAddOns(unittest.TestCase):
         j = self.graph.sigma_export_json()
 
         self.assertTrue(json.loads(j)['error'] == 'true')
+
+
+    def test_sigma_color_picker_correctly_assigns_random_colors(self):
+        
+        self.graph_attr.sigma_make_graph()
+
+
+        n1_value = self.graph_attr.sigma_nodes['color'][0]
+        n2_value = self.graph_attr.sigma_nodes['color'][1]
+        n3_value = self.graph_attr.sigma_nodes['color'][2]
+        n4_value = self.graph_attr.sigma_nodes['color'][3]
+
+        self.assertEqual(n1_value,n2_value)
+        self.assertNotEqual(n3_value,n4_value)
+
+
+
+    def test_sigma_add_extra_raises_node_type_error_if_no_node_type_field(self):
+        
+        with self.assertRaises(IPySigmaNodeTypeError):
+
+            self.graph.sigma_add_degree_centrality()
+            self.graph.sigma_add_pagerank()
+            self.graph.sigma_add_betweenness_centrality()
+            
+            self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()  # makes df and assigns sigma_nodes and sigma_edges instance variables
+            self.graph.sigma_node_add_extra()
+
+    #TODO need to run this and set up the label functionality 
+    # def test_sigma_add_extra_raises_label_error_if_no_node_type_field(self):
+        
+    #     with self.assertRaises(IPySigmaLabelError):
+
+    #         self.graph.sigma_add_degree_centrality()
+    #         self.graph.sigma_add_pagerank()
+    #         self.graph.sigma_add_betweenness_centrality()
+            
+    #         self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()  # makes df and assigns sigma_nodes and sigma_edges instance variables
+    #         self.graph.sigma_node_add_extra()
