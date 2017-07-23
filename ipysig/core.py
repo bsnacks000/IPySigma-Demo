@@ -215,6 +215,10 @@ class IPySig(object):
         nx.Graph.sigma_color_picker = sigma_color_picker
         nx.Graph.sigma_assign_node_colors = sigma_assign_node_colors
 
+        nx.Graph.sigma_node_add_color = sigma_node_add_color
+        nx.Graph.sigma_node_add_label = sigma_node_add_label
+
+
 
 
 

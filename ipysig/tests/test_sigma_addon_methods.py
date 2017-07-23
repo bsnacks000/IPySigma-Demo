@@ -33,6 +33,9 @@ class TestSigmaAddOns(unittest.TestCase):
         nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
         nx.Graph.sigma_edge_weights = sigma_edge_weights 
 
+        nx.Graph.sigma_node_add_color = sigma_node_add_color
+        nx.Graph.sigma_node_add_label = sigma_node_add_label
+
         nx.Graph.sigma_color_picker = sigma_color_picker
         nx.Graph.sigma_assign_node_colors = sigma_assign_node_colors
  
@@ -149,7 +152,7 @@ class TestSigmaAddOns(unittest.TestCase):
 
     def test_sigma_make_graph_produces_neccesary_columns(self):
         
-        correct_nodes = ['id','x','y','color','size', 'sigma_deg_central', 'sigma_pagerank', 'sigma_between_central']
+        correct_nodes = ['id','x','y','label','node_type','color','size', 'sigma_deg_central', 'sigma_pagerank', 'sigma_between_central']
         correct_edges = ['id','source', 'target', 'color']
         correct_edges_weighted = ['id', 'source','target','color','weight','size']
 
@@ -158,7 +161,6 @@ class TestSigmaAddOns(unittest.TestCase):
 
         node_col_list = self.graph.sigma_nodes.columns.tolist()
         edge_col_list = self.graph.sigma_edges.columns.tolist()
-        print edge_col_list
         weight_edge_col_list = self.weighted_graph.sigma_edges.columns.tolist()
 
         for n in node_col_list:
@@ -245,25 +247,52 @@ class TestSigmaAddOns(unittest.TestCase):
 
 
 
-    def test_sigma_add_extra_raises_node_type_error_if_no_node_type_field(self):
-        
+    def test_sigma_node_add_color_raises_node_type_error(self):
+
+        for node in self.graph_attr.nodes(data=True):
+            del node[1]['node_type']
+
+        self.graph_attr.sigma_nodes, self.graph_attr.sigma_edges = self.graph_attr.sigma_build_pandas_dfs()
+
         with self.assertRaises(IPySigmaNodeTypeError):
+            self.graph_attr.sigma_node_add_color()
 
-            self.graph.sigma_add_degree_centrality()
-            self.graph.sigma_add_pagerank()
-            self.graph.sigma_add_betweenness_centrality()
-            
-            self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()  # makes df and assigns sigma_nodes and sigma_edges instance variables
-            self.graph.sigma_node_add_extra()
 
-    #TODO need to run this and set up the label functionality 
-    # def test_sigma_add_extra_raises_label_error_if_no_node_type_field(self):
-        
-    #     with self.assertRaises(IPySigmaLabelError):
 
-    #         self.graph.sigma_add_degree_centrality()
-    #         self.graph.sigma_add_pagerank()
-    #         self.graph.sigma_add_betweenness_centrality()
-            
-    #         self.graph.sigma_nodes, self.graph.sigma_edges = self.graph.sigma_build_pandas_dfs()  # makes df and assigns sigma_nodes and sigma_edges instance variables
-    #         self.graph.sigma_node_add_extra()
+    def test_sigma_node_add_label_raises_label_error(self):
+
+        for node in self.graph_attr.nodes(data=True):
+            del node[1]['label']
+
+        self.graph_attr.sigma_nodes, self.graph_attr.sigma_edges = self.graph_attr.sigma_build_pandas_dfs()
+
+        with self.assertRaises(IPySigmaLabelError):
+            self.graph_attr.sigma_node_add_label()
+
+
+    def test_sigma_node_add_color_default_assigns_none_to_node_type(self):
+
+        for node in self.graph_attr.nodes(data=True):
+            del node[1]['node_type']
+
+        self.graph_attr.sigma_make_graph()
+
+        nt = self.graph_attr.sigma_nodes['node_type'].tolist()
+        correct = [None, None, None, None]
+
+        self.assertEqual(nt, correct) 
+
+
+
+    def test_sigma_node_add_label_default_assigns_id_to_label(self):
+
+        for node in self.graph_attr.nodes(data=True):
+            del node[1]['label']
+
+        self.graph_attr.sigma_make_graph()
+
+        id_col = self.graph_attr.sigma_nodes['id'].tolist()
+        label_col = self.graph_attr.sigma_nodes['label'].tolist()
+
+        self.assertEqual(id_col, label_col)
+
