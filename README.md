@@ -1,5 +1,5 @@
 # IPySigma-Demo
-#### current version: 0.1.1
+#### current version: 0.1.2
 
 This is a demo version of the IPySigma jupyter/node.js application for graph visualization.
 
@@ -36,4 +36,5 @@ The node-express application is contained in the app folder.
 1. At the root directory launch a jupyter notebook server and run the notebook `ipysig_test.ipynb`
 
 2. Follow the instructions for each cell :)
+
 
