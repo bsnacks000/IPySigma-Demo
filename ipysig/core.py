@@ -95,6 +95,7 @@ class IPySig(object):
     def export_graph_instance(cls, name):   # TODO will need to check for key errors
         cls._store[name].sigma_make_graph()  # TODO error checking
         export = cls._store[name].sigma_export_json() # TODO error checking
+        print(export) 
         return export 
 
 
@@ -215,7 +216,7 @@ class IPySig(object):
         nx.Graph.sigma_color_picker = sigma_color_picker
         nx.Graph.sigma_assign_node_colors = sigma_assign_node_colors
 
-        nx.Graph.sigma_node_add_color = sigma_node_add_color
+        nx.Graph.sigma_node_add_color_node_type = sigma_node_add_color_node_type
         nx.Graph.sigma_node_add_label = sigma_node_add_label
 
 

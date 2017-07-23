@@ -42,7 +42,7 @@ def sigma_make_graph(self):
 
     #NOTE these are handled as warnings
     try:
-        self.sigma_node_add_color()
+        self.sigma_node_add_color_node_type()
 
     except IPySigmaNodeTypeError as err:
         logger.warn('No node_type field detected for node attributes: using default color for all nodes')
@@ -168,7 +168,7 @@ def sigma_node_add_extra(self):
 
 
 
-def sigma_node_add_color(self):
+def sigma_node_add_color_node_type(self):
     '''
     adds a color field based on a node_type column:
     if node_type is not present a default color is chosen, node_type field is set to None and an error is raised.
@@ -180,11 +180,15 @@ def sigma_node_add_color(self):
         if 'node_type' not in self.sigma_nodes:
             raise IPySigmaNodeTypeError
 
+        # clean up
+        self.sigma_nodes['node_type'] = self.sigma_nodes['node_type'].str.replace(r"'", "")  # a single quote throws off json parser
+        self.sigma_nodes['node_type'].fillna(self.sigma_nodes['node_type'],inplace=True)    
+
         colors = self.sigma_color_picker()
-        self.sigma_nodes['color'] = self.sigma_nodes.apply(self.sigma_assign_node_colors, args=(colors,), axis=1) 
+        self.sigma_nodes['color'] = self.sigma_nodes.apply(self.sigma_assign_node_colors, args=(colors,), axis=1)         
 
     except IPySigmaNodeTypeError as err: 
-        self.sigma_nodes['node_type'] = None
+        self.sigma_nodes['node_type'] = 'undefined node_type'
         self.sigma_nodes['color'] = default_node_color
         raise
 
@@ -198,6 +202,10 @@ def sigma_node_add_label(self):
     try:
         if 'label' not in self.sigma_nodes:   # assigns the label field to id if label is not provided
             raise IPySigmaLabelError    
+
+        #clean up labels
+        self.sigma_nodes['label'] = self.sigma_nodes['label'].str.replace(r"'", "")
+        self.sigma_nodes['label'].fillna(self.sigma_nodes['id'],inplace=True)
 
     except IPySigmaLabelError as err:
         self.sigma_nodes['label'] = self.sigma_nodes['id']

@@ -33,7 +33,7 @@ class TestSigmaAddOns(unittest.TestCase):
         nx.Graph.sigma_build_pandas_dfs = sigma_build_pandas_dfs
         nx.Graph.sigma_edge_weights = sigma_edge_weights 
 
-        nx.Graph.sigma_node_add_color = sigma_node_add_color
+        nx.Graph.sigma_node_add_color_node_type = sigma_node_add_color_node_type
         nx.Graph.sigma_node_add_label = sigma_node_add_label
 
         nx.Graph.sigma_color_picker = sigma_color_picker
@@ -255,7 +255,7 @@ class TestSigmaAddOns(unittest.TestCase):
         self.graph_attr.sigma_nodes, self.graph_attr.sigma_edges = self.graph_attr.sigma_build_pandas_dfs()
 
         with self.assertRaises(IPySigmaNodeTypeError):
-            self.graph_attr.sigma_node_add_color()
+            self.graph_attr.sigma_node_add_color_node_type()
 
 
 
@@ -270,7 +270,7 @@ class TestSigmaAddOns(unittest.TestCase):
             self.graph_attr.sigma_node_add_label()
 
 
-    def test_sigma_node_add_color_default_assigns_none_to_node_type(self):
+    def test_sigma_node_add_color_default_assigns_default_to_node_type(self):
 
         for node in self.graph_attr.nodes(data=True):
             del node[1]['node_type']
@@ -278,7 +278,7 @@ class TestSigmaAddOns(unittest.TestCase):
         self.graph_attr.sigma_make_graph()
 
         nt = self.graph_attr.sigma_nodes['node_type'].tolist()
-        correct = [None, None, None, None]
+        correct = ['undefined node_type' for i in range(4)]
 
         self.assertEqual(nt, correct) 
 
