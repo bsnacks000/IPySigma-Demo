@@ -16,7 +16,6 @@
 
 
     <body>
-
         <header>
             <h1> IPySigma: ProtoType</h1>
             <div class="container">
@@ -39,10 +38,36 @@
             <button type="button" id="pauseForceAtlas"> Pause Gravity </button>
         </div>
 
-        <!-- graph sits here -->
         
-        <div class='container' id="graphContainer" ></div>    
-        
+        <!-- booststrap containers for html Table  -->
+        <div class="row">
+            <div class="span8">
+                <!-- graph sits here -->
+                <div id="graphContainer" ></div>    
+            </div>
+            <div class="span4">
+                <div class='container' id='htmlTableWrapper'>
+                    <table class='table' id='htmlTable'>
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Type</th>
+                                <th>Betweeness</th>
+                                <th>Degree</th>
+                                <th>PageRank</th>
+                                <th>Remove?</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>    <!-- jquery fills in rows for node table -->
+                    </table>
+                    <div class="form-group" id="downloadWrapper">
+                        <button id="exportButton" class='btn btn-primary' data-export="export">Export to CSV</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
        
         <!-- bower imports -->
         <!-- <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
@@ -56,6 +81,7 @@
 
         
         <!-- app scripts and modules-->
+        <script type="extra/jquery.tabletoCSV.js"></script>
         <script src="client.js" charset="utf-8"></script>
 
     </body>

@@ -75,8 +75,22 @@ main_room.on('message-reply', function(msg){               // handle the reply m
             s.startForceAtlas2();
     });
 
+    $("#htmlTable").on('click','.rm-btn', function(event){
+        $(this).closest('tr').remove();
+        // if ($('#htmlTable > tbody').is(':empty'))
+        //     $('#htmlTableWrapper').css('visibility','hidden');
+    });
+
+    // exports to local Downloads folder using the jquery plugin
+    $("#exportButton").on('click',function(event){
+        $("#htmlTable").tableToCSV();
+    });
+
+
 })
 
+
+// remove a row from the table - remove header if empty
 
 
 // Loki helpers
@@ -194,6 +208,26 @@ function make_graph(graph_data){
 
 
         s.refresh();
+    });
+
+
+    // binding for html table
+    s.bind('doubleClickNode', function(e){
+        var data = {
+
+            label: "<td>"+ e.data.node.label + "</td>",
+            ntype: "<td>"+e.data.node.node_type + "</td>",
+            betw: "<td>"+e.data.node.sigma_between_central+ "</td>",
+            deg: "<td>"+e.data.node.sigma_deg_central+ "</td>",
+            pager:"<td>"+ e.data.node.sigma_pagerank+ "</td>"
+        };
+
+        var removeButton = "<td><button type=button class='rm-btn'>remove</button><td>" ;
+
+        // append the node row
+        $('#htmlTable > tbody').append(
+            "<tr>" +data.label + data.ntype + data.betw + data.deg + data.pager + removeButton + "</tr>"
+        );
     });
 
     return s; // return the sigma instance to outer scope..
