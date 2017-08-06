@@ -12,11 +12,15 @@ var responses = db.addCollection('responses');
 // available graphs should be stored by title as some kind of selectable list view on the page
 // For now.. we just hit python every time we load 
 
+
+
+
 $('#load-main-graph').submit(function(e){
     e.preventDefault()
 
     var title = $('#graph-title').val();
     console.log(title);
+
 
     query_loki('main_graph').then(function(db_query){       //query object from loki... if not in db emit request to kernel
         
@@ -61,8 +65,21 @@ main_room.on('message-reply', function(msg){               // handle the reply m
     //push the response into the database
     //push_to_loki(msg);
 
+    // create custom html table header
+
+    var graph_data_extra_filter = [
+    'color', 'size', 'x', 'y',
+    'id', 'label', 'node_type', 
+    'sigma_between_central', 'sigma_deg_central','sigma_pagerank'
+]
+    $('#htmlTable > thead').empty()
+    $('#htmlTable > thead').append(make_table_header(extra_headers(graph_data, graph_data_extra_filter)))
+
+
+    $('#graphTitle').text(msg.title)
     $("#graphContainer").empty()
     $("#controlContainer").css('visibility','visible')
+
 
      var s = make_graph(graph_data);
      s.startForceAtlas2(forceAtlasConfig);
@@ -75,10 +92,14 @@ main_room.on('message-reply', function(msg){               // handle the reply m
             s.startForceAtlas2();
     });
 
+
+    $('#toggleInspector').on('click', function(event){
+        $('#htmlTableWrapper').toggle(700)
+    });
+
+
     $("#htmlTable").on('click','.rm-btn', function(event){
         $(this).closest('tr').remove();
-        // if ($('#htmlTable > tbody').is(':empty'))
-        //     $('#htmlTableWrapper').css('visibility','hidden');
     });
 
     // exports to local Downloads folder using the jquery plugin
@@ -213,8 +234,16 @@ function make_graph(graph_data){
 
     // binding for html table
     s.bind('doubleClickNode', function(e){
-        var data = {
+        
+        var extra_filter_mask = [
+            'originalColor', 'read_cam0:size','read_cam0:x',
+            'read_cam0:y','renderer1:size','renderer1:x','renderer1:y',
+            'size', 'x', 'y', 'color', 'id', 'label', 'node_type',
+            'sigma_between_central', 'sigma_deg_central', 'sigma_pagerank'
+        ]
 
+        var data = {
+            id: "<td>" + e.data.node.id + "</td>",
             label: "<td>"+ e.data.node.label + "</td>",
             ntype: "<td>"+e.data.node.node_type + "</td>",
             betw: "<td>"+e.data.node.sigma_between_central+ "</td>",
@@ -222,13 +251,66 @@ function make_graph(graph_data){
             pager:"<td>"+ e.data.node.sigma_pagerank+ "</td>"
         };
 
-        var removeButton = "<td><button type=button class='rm-btn'>remove</button><td>" ;
+        
 
         // append the node row
-        $('#htmlTable > tbody').append(
-            "<tr>" +data.label + data.ntype + data.betw + data.deg + data.pager + removeButton + "</tr>"
-        );
+        $('#htmlTable > tbody').append(make_table_row(e, data, extra_columns(e, extra_filter_mask)));
+    
+
     });
 
     return s; // return the sigma instance to outer scope..
+}
+
+
+
+function extra_headers(graph_data, graph_data_extra_filter){
+
+    var extras = Object.keys(graph_data.graph.nodes[0]).filter((header)=>{
+        return graph_data_extra_filter.indexOf(header) === -1;
+    }).sort();
+
+    return extras;   
+}
+
+
+function make_table_header(extra_headers){
+    
+
+    var tr = "<tr id='headerRow'> <th>id</th> <th>label</th> <th>node_type</th> <th>betweeness</th>" + 
+    "<th>degree</th><th>pagerank</th> <th> remove? </th>";
+
+
+    for(var i=0; i < extra_headers.length; i++)
+        tr += "<th>" + extra_headers[i] + "</th>"
+
+    tr += '</tr>'
+    return tr
+}
+
+
+
+function extra_columns(e, extra_filter_mask){
+
+    var extras = Object.keys(e.data.node).filter(function(header){
+        return extra_filter_mask.indexOf(header) === -1;
+    }).sort();
+
+    return extras;
+}
+
+
+
+function make_table_row(e, data, extra_columns){
+    
+    // helper to create a table row dynamically - takes in data object // returns a tr string 
+    var removeButton = "<td><button type=button class='rm-btn'>remove</button><td>" ;
+    var tr = "<tr>" + data.id + data.label + data.ntype + data.betw + data.deg + data.pager;
+
+    for(var i=0; i < extra_columns.length; i++)
+        tr += "<td>" + e.data.node[extra_columns[i]] + "</td>"
+
+    tr += removeButton + '</tr>'
+    return tr 
+
 }

@@ -36,28 +36,25 @@
         <!-- pause Force Atlas button -->
         <div class='container' id='controlContainer'>
             <button type="button" id="pauseForceAtlas"> Pause Gravity </button>
+            <button type="button" id="toggleInspector"> Toggle Inspector </button>
         </div>
-
         
         <!-- booststrap containers for html Table  -->
         <div class="row">
-            <div class="span8">
+            <div class="span12">
                 <!-- graph sits here -->
                 <div id="graphContainer" ></div>    
             </div>
-            <div class="span4">
-                <div class='container' id='htmlTableWrapper'>
+        </div>
+
+        <div class = row>
+            <div class="span12">
+                
+                <div class="header navbar-fixed-top" id='htmlTableWrapper'>
+
                     <table class='table' id='htmlTable'>
-                        <thead>
-                            <tr>
-                                <th>Label</th>
-                                <th>Type</th>
-                                <th>Betweeness</th>
-                                <th>Degree</th>
-                                <th>PageRank</th>
-                                <th>Remove?</th>
-                            </tr>
-                        </thead>
+                        <caption id='graphTitle'></caption> <!-- jquery brings in the graph title here-->
+                        <thead></thead>    <!-- jquery fills in the header table -->
                         <tbody></tbody>    <!-- jquery fills in rows for node table -->
                     </table>
                     <div class="form-group" id="downloadWrapper">

@@ -40,11 +40,20 @@
 
 #controlContainer {
     visibility: hidden;
+    margin-top: 10px;
 }
 
 #htmlTableWrapper {
     width: 52%;
     margin-left: 48%;
+    margin-top: 20px;
     background-color: transparent;
-    visibility: visible;
+    position: absolute;
+    display: none;
+}
+
+#graphTitle{
+    font-size: 16px;
+    color: black;
+
 }
