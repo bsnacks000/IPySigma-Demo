@@ -43,8 +43,6 @@ class PyNamespace(BaseNamespace):
     # callback established here
     def on_pyconnect_response(self, package):
 
-        print(package)
-
         print('Node received: ' + package['echo_name'])               # callback from 
         web.open_new_tab('http://localhost:'+ package['http_port']) #TODO: check package for bad url
         time.sleep(1)    # possibly not needed
@@ -78,14 +76,14 @@ class IPySig(object):
         # one time initialization
         self.node_path = node_path  # TODO: error check path for validity and possibly to see if the app is listed in the proper directory
 
-        if not IPySig.activated:                   
+        if not self.__class__.activated:                   
             self._sigma_api_injector()  # this injects our api into the networkx Graph class 
-            IPySig.activated = True    # Sigma networkx API is already activated - bypasses the injector
+            self.__class__.activated = True    # Sigma networkx API is already activated - bypasses the injector
 
-        if IPySig.url is None:
+        if self.__class__.url is None:
             self._get_url_oneserver()  # gets the url ## TODO Catch attribute errors if no Notebook server is running
 
-        if IPySig.exp_process is None:
+        if self.__class__.exp_process is None:
             self.init_express() # threading and subprocess calls run_node if subprocess not running
 
     #Anything node interacts with for IPySig objects must be a class method
@@ -95,7 +93,7 @@ class IPySig(object):
     def export_graph_instance(cls, name):   # TODO will need to check for key errors
         cls._store[name].sigma_make_graph()  # TODO error checking
         export = cls._store[name].sigma_export_json() # TODO error checking
-        print(export) 
+
         return export 
 
 
@@ -105,7 +103,7 @@ class IPySig(object):
         :CALLS: _emit_instance_name()
 
         '''
-        IPySig._store[key_name] = graph # TODO:: error check        
+        self.__class__._store[key_name] = graph # TODO:: error check        
         self._emit_instance_name(key_name)   # send instance name and bind with browser socket id
 
 
@@ -129,11 +127,11 @@ class IPySig(object):
         '''
         # TODO: error checking target string
         out = sbp.check_output(['jupyter','notebook','list']).split('\n')[1].split(' ')[0]  # pulls out single url
-        IPySig.url = re.match(r'http://.+/',out).group()
+        self.__class__.url = re.match(r'http://.+/',out).group()
         token = re.search(r'(?<=token=).+',out)
 
         if token:
-            IPySig.token = token.group()
+            self.__class__.token = token.group()
 
     def init_express(self):
         '''
@@ -141,15 +139,15 @@ class IPySig(object):
         calls the express app using _run_node().. not sure if this should be on a new thread.. 
         
         '''
-        if IPySig.exp_process is None:
+        if self.__class__.exp_process is None:
             
-            IPySig.exp_process = self._run_node()  # TODO:: error check
+            self.__class__.exp_process = self._run_node()  # TODO:: error check
             print('loading express... ')
             time.sleep(1)
-            print('IPySig express has started... PID: '+ str(IPySig.exp_process.pid))
+            print('IPySig express has started... PID: '+ str(self.__class__.exp_process.pid))
         
         else:
-            print('IPySIg is already running... PID: ' + str(IPySig.exp_process))
+            print('IPySIg is already running... PID: ' + str(self.__class__.exp_process))
 
     def _emit_instance_name(self, key_name):
         '''
@@ -173,9 +171,9 @@ class IPySig(object):
         '''
         express_app = None
         
-        node_command = ['node', self.node_path +'/index.js', '--baseUrl', IPySig.url]
-        if IPySig.token:
-            node_command.append('--token={}'.format(IPySig.token)) # attach if running notebook has token (4.2.3+)
+        node_command = ['node', self.node_path +'/index.js', '--baseUrl', self.__class__.url]
+        if self.__class__.token:
+            node_command.append('--token={}'.format(self.__class__.token)) # attach if running notebook has token (4.2.3+)
 
         print(' '.join(node_command))      
         express_app = sbp.Popen(node_command, stdout=sbp.PIPE, bufsize=1, universal_newlines=True)  # TODO:: error check
@@ -187,11 +185,11 @@ class IPySig(object):
 
         #if IPySig.exp_process is not None or IPySig.exp_process.poll() is None:
         
-        if IPySig.exp_process is not None:
-            IPySig.exp_process.kill()
-            print(str(IPySig.exp_process.pid) + ' has been killed')
+        if self.__class__.exp_process is not None:
+            self.__class__.exp_process.kill()
+            print(str(self.__class__.exp_process.pid) + ' has been killed')
 
-            IPySig.exp_process = None
+            self.__class__.exp_process = None
         else:
             print('There is currently no IPySig.exp_process running')
     
@@ -218,12 +216,4 @@ class IPySig(object):
 
         nx.Graph.sigma_node_add_color_node_type = sigma_node_add_color_node_type
         nx.Graph.sigma_node_add_label = sigma_node_add_label
-
-
-
-
-
-if __name__ == '__main__':
-
-    pass
 

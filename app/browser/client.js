@@ -26,13 +26,11 @@ $('#load-main-graph').submit(function(e){
         
         if (db_query.length != 0){
             
-            //FIXME pass here for now...
+            //FIXME pass here for now... should hit the memory cache/db first before emit
 
-            //$('#graph-string').append($('<li>').text("Loki says: " + JSON.stringify(db_query[0]) ));
-            //console.log(db_query[0])
         } else {
             var g = responses.data[0].py_obj_name
-            //var g = 'Gary'
+
             main_room.emit('get-graph', {'title': title,'graph_name': g });  //FIXME need to figure out how to properly query loki for py_obj_name 
         }
     });
@@ -49,7 +47,6 @@ browser_room.on('pyobj-ref-to-browser', (obj_ref)=>{
 
 
 main_room.on('message-reply', function(msg){               // handle the reply message
-    //FIXME: this method needs to be re-written
     // TODO: error check both msg status and that return value is the correct format
     // this parse and error checking should probably move to the server
 
@@ -114,7 +111,7 @@ main_room.on('message-reply', function(msg){               // handle the reply m
 // remove a row from the table - remove header if empty
 
 
-// Loki helpers
+// Loki helpers -- current version does not use these methods
 
 // loki helper functions that parses and pushes
 function push_py_obj_to_loki(py_obj){
@@ -167,7 +164,6 @@ var forceAtlasConfig = {
 
 function make_graph(graph_data){
 
-    console.log('inside make_graph')
 
     var s = new sigma({
             graph: graph_data.graph,
